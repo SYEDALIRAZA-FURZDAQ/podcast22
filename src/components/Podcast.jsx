@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { server } from '../index';
 import axios from 'axios';
-import { Card, CardHeader, CardBody, CardFooter, Box, Image, Text, Container, VStack, Button, HStack } from '@chakra-ui/react';
+import { Card, CardHeader, CardBody, CardFooter, Box, Image, Text, Container, VStack, Button, HStack, Center } from '@chakra-ui/react';
 import { BiHeart } from 'react-icons/bi';
+import { FaPlay } from "react-icons/fa";
 import Loader from './Loader';
 import Error from './Error';
 
@@ -55,13 +56,19 @@ const Podcast = () => {
                     <Text>{podcast.description}</Text>
                   </CardBody>
                   <CardFooter>
-                    <Text>Duration: {podcast.duration}</Text>
+                    <Text display="flex" justifyContent="center" alignItems="center" textAlign="center"
+                    >Duration: {podcast.duration}</Text>
                   </CardFooter>
+                  <CardFooter>
                   <CardFooter>
                     <Button flex='1' variant='ghost' leftIcon={<BiHeart />}>
                       Like
                     </Button>
                   </CardFooter>
+                  <Button flex='1' variant='ghost' leftIcon={<FaPlay />}>
+                    Listen
+                  </Button>
+                </CardFooter>
                 </Card>
               </Box>
             ))}
