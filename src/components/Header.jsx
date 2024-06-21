@@ -63,6 +63,15 @@ const Header = () => {
                 variant={'ghost'}
                 colorScheme={'purple'}
               >
+                <Link to={'/geners'}>Genres</Link>
+              </Button>
+
+
+              <Button
+                onClick={onClose}
+                variant={'ghost'}
+                colorScheme={'purple'}
+              >
                 <Link to={'/favourit'}>Favourits</Link>
               </Button>
 
