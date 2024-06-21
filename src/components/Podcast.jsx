@@ -20,7 +20,7 @@ import { Box,
 import { BiHeart } from 'react-icons/bi';
 import Loader from './Loader';
 import Error from './Error';
-import { FaPlay } from "react-icons/fa"
+import { FaPlay } from "react-icons/fa";
 
 const Podcast = () => {
   const [podcastData, setPodcastData] = useState([]);
@@ -29,15 +29,23 @@ const Podcast = () => {
   const [page, setPage] = useState(1);
   const [selectedPodcast, setSelectedPodcast] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const itemsPerPage = 12; // Increased to show more items per page
+  const itemsPerPage = 12; 
+  const [sortDirection, setSortDirection] = useState('asc'); 
+  const [sortedField, setSortedField] = useState('title'); 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data } = await axios.get(`${server}`);
-        // Sort data alphabetically by title
-        data.sort((a, b) => a.title.localeCompare(b.title));
-        setPodcastData(data);
+        // Sort data based on sortedField and sortDirection
+        const sortedData = [...data].sort((a, b) => {
+          if (sortDirection === 'asc') {
+            return a[sortedField].localeCompare(b[sortedField]);
+          } else {
+            return b[sortedField].localeCompare(a[sortedField]);
+          }
+        });
+        setPodcastData(sortedData);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -45,7 +53,7 @@ const Podcast = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [sortDirection, sortedField]);
 
   const changePage = (pageNumber) => {
     setPage(pageNumber);
@@ -60,6 +68,14 @@ const Podcast = () => {
   const currentItems = podcastData.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(podcastData.length / itemsPerPage);
 
+  const toggleSortDirection = () => {
+    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+  };
+
+  const handleSort = (field) => {
+    setSortedField(field);
+  };
+
   if (error) return <Error message={"Error While Fetching data From API "} />;
 
   return (
@@ -68,44 +84,54 @@ const Podcast = () => {
         <Loader />
       ) : (
         <VStack spacing={8}>
+          <HStack spacing={4}>
+            <Button
+              size="sm"
+              onClick={() => handleSort('title')}
+              variant={sortedField === 'title' ? 'solid' : 'outline'}
+            >
+              Title {sortedField === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </Button>
+          {/* Thabang Add More Buttons  */}
+          </HStack>
           <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={6}>
-              {currentItems.map((podcast, index) => (
-               <VStack key={index} align="stretch" spacing={2}>
-              <Box key={index} position="relative" overflow="hidden" borderRadius="lg" cursor="pointer"    onClick={() => handlePodcastClick(podcast)}>
-                <Image 
-                  src={podcast.image} 
-                  alt={podcast.title} 
-                  w="100%" 
-                  h="250px" 
-                  objectFit="cover" 
-                  transition="transform 0.3s"
-                  _hover={{ transform: 'scale(1.05)' }}
-                />
-                <Box 
-                  position="absolute" 
-                  bottom="0" 
-                  left="0" 
-                  right="0" 
-                  bg="rgba(0,0,0,0.7)" 
-                  p={2}
-                >
-                  <Text color="white" fontWeight="bold" fontSize="sm" noOfLines={1}>
-                    {podcast.title}
-                  </Text>
-                  <Text color="gray.300" fontSize="xs">
-                    {podcast.duration}
-                  </Text>
-                </Box>
+            {currentItems.map((podcast, index) => (
+              <VStack key={index} align="stretch" spacing={2}>
+                <Box key={index} position="relative" overflow="hidden" borderRadius="lg" cursor="pointer" onClick={() => handlePodcastClick(podcast)}>
+                  <Image 
+                    src={podcast.image} 
+                    alt={podcast.title} 
+                    w="100%" 
+                    h="250px" 
+                    objectFit="cover" 
+                    transition="transform 0.3s"
+                    _hover={{ transform: 'scale(1.05)' }}
+                  />
+                  <Box 
+                    position="absolute" 
+                    bottom="0" 
+                    left="0" 
+                    right="0" 
+                    bg="rgba(0,0,0,0.7)" 
+                    p={2}
+                  >
+                    <Text color="white" fontWeight="bold" fontSize="sm" noOfLines={1}>
+                      {podcast.title}
+                    </Text>
+                    <Text color="gray.300" fontSize="xs">
+                      {podcast.duration}
+                    </Text>
+                  </Box>
                 </Box >
                 <HStack spacing={2} justify="space-between">
-                  <Button size="sm" variant='ghost'w='50%' leftIcon={<FaPlay />}flex={1}>
+                  <Button size="sm" variant='ghost' w='50%' leftIcon={<FaPlay />} flex={1}>
                     Play
                   </Button>
-                  <Button size="sm" colorScheme='red'w='50%' rightIcon={<BiHeart />}flex={1}>
+                  <Button size="sm" colorScheme='red' w='50%' rightIcon={<BiHeart />} flex={1}>
                     like
-                    </Button>
-                    </HStack>
-                    </VStack>
+                  </Button>
+                </HStack>
+              </VStack>
             ))}
           </SimpleGrid>
           <SimpleGrid columns={5} spacing={2} w="full" justifyContent="center">
@@ -124,7 +150,7 @@ const Podcast = () => {
         </VStack>
       )}
 
-<Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>{selectedPodcast?.title}</ModalHeader>
