@@ -29,23 +29,14 @@ const Podcast = () => {
   const [page, setPage] = useState(1);
   const [selectedPodcast, setSelectedPodcast] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const itemsPerPage = 12; 
-  const [sortDirection, setSortDirection] = useState('asc'); 
-  const [sortedField, setSortedField] = useState('title'); 
+  const itemsPerPage = 12; // Shows per Page 
+  const [filterLetter, setFilterLetter] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data } = await axios.get(`${server}`);
-        // Sort data based on sortedField and sortDirection
-        const sortedData = [...data].sort((a, b) => {
-          if (sortDirection === 'asc') {
-            return a[sortedField].localeCompare(b[sortedField]);
-          } else {
-            return b[sortedField].localeCompare(a[sortedField]);
-          }
-        });
-        setPodcastData(sortedData);
+        setPodcastData(data);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -53,7 +44,7 @@ const Podcast = () => {
       }
     };
     fetchData();
-  }, [sortDirection, sortedField]);
+  }, []);
 
   const changePage = (pageNumber) => {
     setPage(pageNumber);
@@ -64,17 +55,17 @@ const Podcast = () => {
     onOpen();
   };
 
+  const handleFilter = (letter) => {
+    setFilterLetter(letter);
+  };
+
+  const filteredPodcasts = filterLetter
+    ? podcastData.filter(podcast => podcast.title.startsWith(filterLetter))
+    : podcastData;
+
   const startIndex = (page - 1) * itemsPerPage;
-  const currentItems = podcastData.slice(startIndex, startIndex + itemsPerPage);
-  const totalPages = Math.ceil(podcastData.length / itemsPerPage);
-
-  const toggleSortDirection = () => {
-    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-  };
-
-  const handleSort = (field) => {
-    setSortedField(field);
-  };
+  const currentItems = filteredPodcasts.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(filteredPodcasts.length / itemsPerPage);
 
   if (error) return <Error message={"Error While Fetching data From API "} />;
 
@@ -85,14 +76,19 @@ const Podcast = () => {
       ) : (
         <VStack spacing={8}>
           <HStack spacing={4}>
-            <Button
-              size="sm"
-              onClick={() => handleSort('title')}
-              variant={sortedField === 'title' ? 'solid' : 'outline'}
-            >
-              Title {sortedField === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
-            </Button>
-          {/* Thabang Add More Buttons  */}
+            {[...Array(26)].map((_, index) => {
+              const letter = String.fromCharCode(65 + index); // A-Z Alpahbetically - Next will build it by genere and Seasons 
+              return (
+                <Button
+                  key={index}
+                  size="sm"
+                  onClick={() => handleFilter(letter)}
+                  variant={filterLetter === letter ? 'solid' : 'outline'}
+                >
+                  {letter}
+                </Button>
+              );
+            })}
           </HStack>
           <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={6}>
             {currentItems.map((podcast, index) => (
