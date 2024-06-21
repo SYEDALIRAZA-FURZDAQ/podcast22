@@ -7,6 +7,7 @@ import Favourits from './components/Favourits'
 import AudioPlayer from './components/AudioPlayer'
 import Podcast from './components/Podcast'
 import Geners from './components/Geners'
+import PodcastPage from './components/PodcastPage'
 
 const App = () => {
   return <Router>
@@ -17,6 +18,7 @@ const App = () => {
       <Route path="/favourit" element={<Favourits />} />
       <Route path="audioplayer" element={<AudioPlayer />} />
       <Route path="geners" element={<Geners />} />
+      <Route path="/genres/:genreId" component={PodcastPage} />
       
     </Routes>
     <Footer />    
